@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .utils import *
+from .errors import PutError, GetError, CommitError
 import pickle
 import requests
 import json
@@ -35,7 +36,9 @@ class Sender:
         if key is not None:
             data['params']['key'] = key
 
-        return requests.post(self.endpoint, data=compress(pack(data)))
+        response = requests.post(self.endpoint, data=compress(pack(data))).json()
+        if response['status'] != 'ok':
+            raise PutError
 
 
 class Receiver:
@@ -71,13 +74,16 @@ class Receiver:
             try:
                 response = requests.post(self.endpoint, data=data)
                 message = unpack(decompress(response.content))
-            except snappy.CompressedLengthError:
+            except Exception:
                 yield from self.get(stream, receiver_group, instance)
                 return
 
             if message['status'] == 'end_of_stream':
                 time.sleep(0.5)
                 continue
+
+            elif message['status'] != 'ok':
+                raise GetError
 
             yield Message(**message)
 
@@ -94,4 +100,6 @@ class Receiver:
             }
         })
 
-        return requests.post(self.endpoint, data=data)
+        response = requests.post(self.endpoint, data=data).json()
+        if response['status'] != 'ok':
+            raise CommitError
