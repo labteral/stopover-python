@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .utils import *
+from .utils import get_uid, compress, decompress, pack, unpack
 from .errors import PutError, GetError, CommitError
 import pickle
 import requests
 import json
+import time
 
 
 class Message:
@@ -21,6 +22,7 @@ class Sender:
     def __init__(self, endpoint: str, stream: str):
         self.endpoint = endpoint
         self.stream = stream
+        self.session = requests.Session()
 
     def put(self, value, stream: str = None, key: str = None) -> dict:
         stream = stream if stream else self.stream
@@ -36,7 +38,7 @@ class Sender:
         if key is not None:
             data['params']['key'] = key
 
-        response = requests.post(self.endpoint, data=compress(pack(data))).json()
+        response = self.session.post(self.endpoint, data=compress(pack(data))).json()
         if response['status'] != 'ok':
             raise PutError
 
@@ -49,6 +51,7 @@ class Receiver:
         if instance is None:
             instance = get_uid()
         self.instance = instance
+        self.session = requests.Session()
 
     def get(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
         while True:
@@ -72,7 +75,7 @@ class Receiver:
             })
 
             try:
-                response = requests.post(self.endpoint, data=data)
+                response = self.session.post(self.endpoint, data=data)
                 message = unpack(decompress(response.content))
             except Exception:
                 yield from self.get(stream, receiver_group, instance)
@@ -100,6 +103,6 @@ class Receiver:
             }
         })
 
-        response = requests.post(self.endpoint, data=data).json()
+        response = self.session.post(self.endpoint, data=data).json()
         if response['status'] != 'ok':
             raise CommitError
