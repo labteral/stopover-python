@@ -13,7 +13,8 @@ key = 'key1'
 
 index = 0
 sender.put(f'hi {index}', key=key)
-for message in receiver.get():
+
+for message in receiver.listen():
     print(message.index, message.value)
     receiver.commit(message)
     sender.put(f'hi {index}', key=key)

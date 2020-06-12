@@ -22,7 +22,7 @@ from stopover import Receiver
 
 receiver = Receiver('http://localhost:8080', 'stream0', 'receiver1')
 
-for message in receiver.get():
+for message in receiver.listen():
     print(message.index, message.value)
     receiver.commit(message)
 ```
