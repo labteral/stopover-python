@@ -97,5 +97,9 @@ class Stopover:
             }
         })
         response = self.session.post(self.endpoint, data=data)
-        message = Message(**unpack(decompress(response.content)))
-        return message
+        response_dict = unpack(decompress(response.content))
+
+        if response_dict['status'] != 'ok':
+            return
+
+        return Message(**response_dict)

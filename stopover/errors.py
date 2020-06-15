@@ -5,8 +5,10 @@
 class PutError(Exception):
     pass
 
+
 class CommitError(Exception):
     pass
+
 
 class GetError(Exception):
     pass
