@@ -19,15 +19,19 @@ class Message:
         self.status = status
 
 
-class Sender:
-    def __init__(self, endpoint: str, stream: str):
+class Stopover:
+    LISTEN_INTERVAL = 0.1
+
+    def __init__(self, endpoint: str):
         self.endpoint = endpoint
-        self.stream = stream
+        self._uid = get_uid()
         self.session = requests.Session()
 
-    def put(self, value, stream: str = None, key: str = None) -> dict:
-        stream = stream if stream else self.stream
+    @property
+    def uid(self):
+        return self._uid
 
+    def put(self, value, stream: str, key: str = None) -> dict:
         data = {
             'method': 'put_message',
             'params': {
@@ -43,38 +47,25 @@ class Sender:
         if response['status'] != 'ok':
             raise PutError
 
-
-class Receiver:
-    LISTEN_INTERVAL = 0.1
-
-    def __init__(self, endpoint, stream=None, receiver_group=None, instance=None):
-        self.endpoint = endpoint
-        self.stream = stream
-        self.receiver_group = receiver_group
-        if instance is None:
-            instance = get_uid()
-        self.instance = instance
-        self.session = requests.Session()
-
     def get(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
-        stream, receiver_group, instance = self._process_get_input(stream, receiver_group, instance)
+        instance = instance if instance else self.uid
+        self._check_get_input(stream, receiver_group)
         message = self._get(stream, receiver_group, instance)
         return message
 
     def listen(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
-        stream, receiver_group, instance = self._process_get_input(stream, receiver_group, instance)
+        instance = instance if instance else self.uid
+        self._check_get_input(stream, receiver_group)
         while True:
             message = self._get(stream, receiver_group, instance)
 
             if message.status != 'ok':
-                time.sleep(Receiver.LISTEN_INTERVAL)
+                time.sleep(Stopover.LISTEN_INTERVAL)
                 continue
 
             yield message
 
-    def commit(self, message, receiver_group: str = None):
-        receiver_group = receiver_group if receiver_group else self.receiver_group
-
+    def commit(self, message: Message, receiver_group: str):
         data = json.dumps({
             'method': 'commit_message',
             'params': {
@@ -89,20 +80,14 @@ class Receiver:
         if response['status'] != 'ok':
             raise CommitError
 
-    def _process_get_input(self, stream: str = None, receiver_group: str = None, instance: str = None):
-        stream = stream if stream else self.stream
-        receiver_group = receiver_group if receiver_group else self.receiver_group
-        instance = instance if instance else self.instance
-
+    def _check_get_input(self, stream: str, receiver_group: str):
         if receiver_group is None:
-            raise ValueError('stream was not provided')
+            raise ValueError('receiver group was not provided')
 
         if stream is None:
             raise ValueError('stream was not provided')
 
-        return stream, receiver_group, instance
-
-    def _get(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
+    def _get(self, stream: str, receiver_group: str, instance: str) -> Message:
         data = json.dumps({
             'method': 'get_message',
             'params': {
