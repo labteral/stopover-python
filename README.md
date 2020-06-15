@@ -1,28 +1,22 @@
 # Installation
+
 ```bash
 pip install stopover
 ```
 
 # Usage
-## Sender
+
 ```python
-from stopover import Receiver
+from stopover import Stopover
 
-sender = Sender('http://localhost:8080', 'stream0')
+endpoint = 'http://localhost:8080'
+receiver_group = 'group0'
+stream = 'stream0'
 
-index = 0
-while True:
-  sender.put(f'hello world #{index}')
-  index += 1
-```
+stopover = Stopover(endpoint)
 
-## Receiver
-```python
-from stopover import Receiver
-
-receiver = Receiver('http://localhost:8080', 'stream0', 'receiver1')
-
-for message in receiver.listen():
-    print(message.index, message.value)
-    receiver.commit(message)
+stopover.put(f'hi {index}', stream)
+for message in stopover.listen(stream, receiver_group):
+    stopover.commit(message, receiver_group)
+    stopover.put(f'hi {index}', stream)
 ```
