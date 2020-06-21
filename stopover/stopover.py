@@ -18,6 +18,22 @@ class Message:
         self.timestamp = timestamp
         self.status = status
 
+    @property
+    def dict(self):
+        return {
+            'stream': self.stream,
+            'partition': self.partition,
+            'index': self.index,
+            'value': self.value,
+            'timestamp': self.timestamp,
+            'status': self.status
+        }
+
+    def __str__(self):
+        message_dict = self.dict
+        message_dict['value'] = str(message_dict['value'])
+        return json.dumps(message_dict, indent=2)
+
 
 class Stopover:
     LISTEN_INTERVAL = 0.1
@@ -32,10 +48,13 @@ class Stopover:
         return self._uid
 
     def put(self, value, stream: str, key: str = None) -> dict:
+        if not isinstance(value, (str, int, float, bytes, dict, tuple, list, bool)):
+            value = pickle.dumps(value, protocol=5)
+
         data = {
             'method': 'put_message',
             'params': {
-                'value': pickle.dumps(value),
+                'value': value,
                 'stream': stream,
             }
         }
@@ -102,4 +121,9 @@ class Stopover:
         if response_dict['status'] != 'ok':
             return
 
+        if isinstance(response_dict['value'], bytes):
+            try:
+                response_dict['value'] = pickle.loads(response_dict['value'])
+            except Exception:
+                pass
         return Message(**response_dict)
