@@ -34,6 +34,9 @@ class Message:
         message_dict['value'] = str(message_dict['value'])
         return json.dumps(message_dict, indent=2)
 
+    def copy(self):
+        return Message(**self.dict)
+
 
 class Stopover:
     LISTEN_INTERVAL = 0.1

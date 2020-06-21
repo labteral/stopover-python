@@ -17,7 +17,7 @@ def pack(message: dict) -> bytes:
 def unpack(message: bytes) -> dict:
     try:
         return bson.decode(message)
-    except Exception:
+    except bson.errors.InvalidBSON:
         return json.loads(message)
 
 
