@@ -66,22 +66,25 @@ class Stopover:
             data['params']['key'] = key
 
         response = self.session.post(self.endpoint, data=compress(pack(data))).json()
-        if response['status'] != 'ok':
-            raise PutError
 
-    def get(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
-        instance = instance if instance else self.uid
+        if 'status' not in response or response['status'] != 'ok':
+            raise PutError(json.dumps(response))
+
+    def get(self, stream: str = None, receiver_group: str = None, receiver: str = None) -> Message:
+        receiver = receiver if receiver else self.uid
         self._check_get_input(stream, receiver_group)
-        message = self._get(stream, receiver_group, instance)
+        message = self._get(stream, receiver_group, receiver)
         return message
 
-    def listen(self, stream: str = None, receiver_group: str = None, instance: str = None) -> Message:
-        instance = instance if instance else self.uid
+    def listen(self,
+               stream: str = None,
+               receiver_group: str = None,
+               receiver: str = None) -> Message:
+        receiver = receiver if receiver else self.uid
         self._check_get_input(stream, receiver_group)
         while True:
-            message = self._get(stream, receiver_group, instance)
-
-            if message.status != 'ok':
+            message = self._get(stream, receiver_group, receiver)
+            if not message or message.status != 'ok':
                 time.sleep(Stopover.LISTEN_INTERVAL)
                 continue
 
@@ -94,7 +97,7 @@ class Stopover:
                 'stream': message.stream,
                 'partition': message.partition,
                 'index': message.index,
-                'receiver': receiver_group,
+                'receiver_group': receiver_group,
             }
         })
 
@@ -109,19 +112,19 @@ class Stopover:
         if stream is None:
             raise ValueError('stream was not provided')
 
-    def _get(self, stream: str, receiver_group: str, instance: str) -> Message:
+    def _get(self, stream: str, receiver_group: str, receiver: str) -> Message:
         data = json.dumps({
             'method': 'get_message',
             'params': {
                 'stream': stream,
-                'receiver': receiver_group,
-                'instance': instance
+                'receiver_group': receiver_group,
+                'receiver': receiver
             }
         })
         response = self.session.post(self.endpoint, data=data)
         response_dict = unpack(decompress(response.content))
 
-        if response_dict['status'] != 'ok':
+        if 'status' not in response_dict or response_dict['status'] != 'ok':
             return
 
         if isinstance(response_dict['value'], bytes):
