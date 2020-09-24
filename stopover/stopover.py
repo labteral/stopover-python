@@ -41,9 +41,13 @@ class Message:
 class Stopover:
     LISTEN_INTERVAL = 0.1
 
-    def __init__(self, endpoint: str):
+    def __init__(self, endpoint: str, uid: str = None):
         self.endpoint = endpoint
-        self._uid = get_uid()
+        if uid is not None:
+            self._uid = uid
+        else:
+            self._uid = get_uid()
+
         self.session = requests.Session()
 
     @property
