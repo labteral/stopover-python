@@ -55,7 +55,7 @@ class Stopover:
         return self._uid
 
     def put(self, value, stream: str, key: str = None) -> dict:
-        if not isinstance(value, (str, int, float, bytes, dict, tuple, list, bool)):
+        if not isinstance(value, (str, int, float, bytes, bool)):
             value = pickle.dumps(value, protocol=5)
 
         data = {
