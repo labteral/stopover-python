@@ -9,7 +9,7 @@ import json
 import time
 
 
-class Message:
+class MessageResponse:
     def __init__(self, stream, partition, index, value, timestamp, status=None, **kwargs):
         self.stream = stream
         self.partition = partition
@@ -35,7 +35,7 @@ class Message:
         return json.dumps(message_dict, indent=2)
 
     def copy(self):
-        return Message(**self.dict)
+        return MessageResponse(**self.dict)
 
 
 class Stopover:
@@ -74,7 +74,7 @@ class Stopover:
         if 'status' not in response or response['status'] != 'ok':
             raise PutError(json.dumps(response))
 
-    def get(self, stream: str = None, receiver_group: str = None, receiver: str = None) -> Message:
+    def get(self, stream: str = None, receiver_group: str = None, receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         self._check_get_input(stream, receiver_group)
         message = self._get(stream, receiver_group, receiver)
@@ -83,7 +83,7 @@ class Stopover:
     def listen(self,
                stream: str = None,
                receiver_group: str = None,
-               receiver: str = None) -> Message:
+               receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         self._check_get_input(stream, receiver_group)
         while True:
@@ -94,7 +94,7 @@ class Stopover:
 
             yield message
 
-    def commit(self, message: Message, receiver_group: str):
+    def commit(self, message: MessageResponse, receiver_group: str):
         data = json.dumps({
             'method': 'commit_message',
             'params': {
@@ -116,7 +116,7 @@ class Stopover:
         if stream is None:
             raise ValueError('stream was not provided')
 
-    def _get(self, stream: str, receiver_group: str, receiver: str) -> Message:
+    def _get(self, stream: str, receiver_group: str, receiver: str) -> MessageResponse:
         data = json.dumps({
             'method': 'get_message',
             'params': {
@@ -136,4 +136,4 @@ class Stopover:
                 response_dict['value'] = pickle.loads(response_dict['value'])
             except Exception:
                 pass
-        return Message(**response_dict)
+        return MessageResponse(**response_dict)
