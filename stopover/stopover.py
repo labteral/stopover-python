@@ -74,18 +74,13 @@ class Stopover:
         if 'status' not in response or response['status'] != 'ok':
             raise PutError(json.dumps(response))
 
-    def get(self, stream: str = None, receiver_group: str = None, receiver: str = None) -> MessageResponse:
+    def get(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
-        self._check_get_input(stream, receiver_group)
         message = self._get(stream, receiver_group, receiver)
         return message
 
-    def listen(self,
-               stream: str = None,
-               receiver_group: str = None,
-               receiver: str = None) -> MessageResponse:
+    def listen(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
-        self._check_get_input(stream, receiver_group)
         while True:
             message = self._get(stream, receiver_group, receiver)
             if not message or message.status != 'ok':
@@ -109,12 +104,16 @@ class Stopover:
         if response['status'] != 'ok':
             raise CommitError
 
-    def _check_get_input(self, stream: str, receiver_group: str):
-        if receiver_group is None:
-            raise ValueError('receiver group was not provided')
-
-        if stream is None:
-            raise ValueError('stream was not provided')
+    def knock(self, receiver_group: str, receiver: str = None):
+        receiver = receiver if receiver else self.uid
+        data = json.dumps({
+            'method': 'knock',
+            'params': {
+                'receiver_group': receiver_group,
+                'receiver': receiver
+            }
+        })
+        self.session.post(self.endpoint, data=data)
 
     def _get(self, stream: str, receiver_group: str, receiver: str) -> MessageResponse:
         data = json.dumps({
