@@ -12,3 +12,7 @@ class CommitError(Exception):
 
 class GetError(Exception):
     pass
+
+
+class ServerConnectionError(Exception):
+    pass

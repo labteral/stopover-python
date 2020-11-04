@@ -2,11 +2,26 @@
 # -*- coding: utf-8 -*-
 
 from .utils import get_uid, compress, decompress, pack, unpack
-from .errors import PutError, GetError, CommitError
+from .errors import PutError, GetError, CommitError, ServerConnectionError
 import pickle
 import requests
 import json
 import time
+
+
+def raise_connection_error(method):
+    def raise_connection_error_(self, *args, **kwargs):
+        raise_connection_error = False
+        try:
+            return method(self, *args, **kwargs)
+        except requests.exceptions.RequestException:
+            raise_connection_error = True
+
+        if raise_connection_error:
+            raise ServerConnectionError(
+                f"error connecting to the Stopover server ({self.endpoint})")
+
+    return raise_connection_error_
 
 
 class MessageResponse:
@@ -54,6 +69,7 @@ class Stopover:
     def uid(self):
         return self._uid
 
+    @raise_connection_error
     def put(self, value, stream: str, key: str = None) -> dict:
         if not isinstance(value, (str, int, float, bytes, bool)):
             value = pickle.dumps(value, protocol=5)
@@ -74,11 +90,13 @@ class Stopover:
         if 'status' not in response or response['status'] != 'ok':
             raise PutError(json.dumps(response))
 
+    @raise_connection_error
     def get(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         message = self._get(stream, receiver_group, receiver)
         return message
 
+    @raise_connection_error
     def listen(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         while True:
@@ -89,6 +107,7 @@ class Stopover:
 
             yield message
 
+    @raise_connection_error
     def commit(self, message: MessageResponse, receiver_group: str):
         data = json.dumps({
             'method': 'commit_message',
@@ -104,6 +123,7 @@ class Stopover:
         if response['status'] != 'ok':
             raise CommitError
 
+    @raise_connection_error
     def knock(self, receiver_group: str, receiver: str = None):
         receiver = receiver if receiver else self.uid
         data = json.dumps({
