@@ -1,4 +1,4 @@
-FROM brunneis/python:3.8
+FROM brunneis/python:3.9
 
 RUN \
     apt-get update \
