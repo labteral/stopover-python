@@ -10,7 +10,7 @@ key = None  # all the messages with the same key will fall under the same partit
 
 stopover = Stopover(endpoint)
 
-stopover.put(f'hi 0', stream, key=key)
+stopover.put('hi 0', stream, key=key)
 index = 1
 for message in stopover.listen(stream, receiver_group):
     print(message.index, message.value)
