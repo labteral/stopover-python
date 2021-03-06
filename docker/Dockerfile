@@ -8,9 +8,9 @@ RUN \
     && dpkg-query -Wf '${Package}\n' | sort > current_pkgs \
     && pip install --upgrade pip \
     && pip install \
-    pymongo==3.10.1 \
-    python-snappy==0.5.4 \
-    requests==2.24.0 \
+    "msgpack==1.0.2" \
+    "python-snappy==0.5.4" \
+    "requests==2.24.0" \
     && apt-get -y purge $(diff -u init_pkgs current_pkgs | grep -E "^\+" | cut -d + -f2- | sed -n '1!p' | uniq) \
     && apt-get clean
 

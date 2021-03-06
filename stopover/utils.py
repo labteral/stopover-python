@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import bson
+import msgpack
 import snappy
 import json
 import time
@@ -11,13 +11,13 @@ from uuid import uuid4
 
 
 def pack(message: dict) -> bytes:
-    return bson.encode(message)
+    return msgpack.packb(message)
 
 
 def unpack(message: bytes) -> dict:
     try:
-        return bson.decode(message)
-    except bson.errors.InvalidBSON:
+        return msgpack.unpackb(message)
+    except Exception:
         return json.loads(message)
 
 
