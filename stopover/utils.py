@@ -16,7 +16,11 @@ def pack(message: dict) -> bytes:
 
 def unpack(message: bytes) -> dict:
     try:
-        return msgpack.unpackb(message)
+        try:
+            return msgpack.unpackb(message)
+        except Exception:
+            import bson
+            return bson.decode(message)
     except Exception:
         return json.loads(message)
 
