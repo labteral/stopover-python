@@ -8,6 +8,8 @@ import time
 import random
 import hashlib
 from uuid import uuid4
+import logging
+import bson
 
 
 def pack(message: dict) -> bytes:
@@ -15,14 +17,7 @@ def pack(message: dict) -> bytes:
 
 
 def unpack(message: bytes) -> dict:
-    try:
-        try:
-            return msgpack.unpackb(message)
-        except Exception:
-            import bson
-            return bson.decode(message)
-    except Exception:
-        return json.loads(message)
+    return msgpack.unpackb(message)
 
 
 def compress(message: bytes) -> bytes:
@@ -30,10 +25,7 @@ def compress(message: bytes) -> bytes:
 
 
 def decompress(message: bytes) -> bytes:
-    try:
-        return snappy.decompress(message)
-    except snappy.UncompressError:
-        return message
+    return snappy.decompress(message)
 
 
 def get_timestamp_ms() -> int:
