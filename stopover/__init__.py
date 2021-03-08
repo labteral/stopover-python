@@ -3,4 +3,4 @@
 
 from .stopover import *
 
-__version__ = 'v21.3.2'
+__version__ = '21.3.2'
