@@ -8,8 +8,6 @@ import time
 import random
 import hashlib
 from uuid import uuid4
-import logging
-import bson
 
 
 def pack(message: dict) -> bytes:
