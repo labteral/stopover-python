@@ -3,22 +3,22 @@ from threading import Thread, Lock
 
 
 def thread_func(name):
-    for i in range(100):
+    for i in range(1000):
         with lock:
             message = f'{name}_{i}'
             stopover.put(message, topic)
-            print(f'sent: {message.value}')
+            print(f'sent: {message}')
             data.add(message)
 
 
-topic = 'test_topic'
-group = 'test_group'
-stopover = Stopover('http://10.0.0.53:5704')
+topic = 'test_topic1'
+group = 'test_group1'
+stopover = Stopover('http://localhost:5704')
 lock = Lock()
 data = set()
 
 threads = []
-for i in range(32):
+for i in range(8):
     name = f'thread_{i}'
     thread = Thread(target=thread_func, args=[name])
     threads.append(thread)
