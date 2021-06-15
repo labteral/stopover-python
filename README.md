@@ -2,16 +2,17 @@
 <img src="misc/stopover.svg" alt="Stopover Logo" width="150"/></a>
 </p>
 
+<div align="center">
+Python client for <b>Stopover</b>
+</div>
+<br>
+
 <p align="center">
     <a href="https://pepy.tech/project/stopover/"><img alt="Downloads" src="https://img.shields.io/badge/dynamic/json?style=flat-square&maxAge=3600&label=downloads&query=$.total_downloads&url=https://api.pepy.tech/api/projects/stopover"></a>
     <a href="https://pypi.python.org/pypi/stopover/"><img alt="PyPi" src="https://img.shields.io/pypi/v/stopover.svg?style=flat-square"></a>
-    <!--<a href="https://github.com/labteral/pygram/releases"><img alt="GitHub releases" src="https://img.shields.io/github/release/labteral/stopover.svg?style=flat-square"></a>-->
-    <a href="https://github.com/labteral/stopover/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/labteral/stopover.svg?style=flat-square&color=green"></a>
+    <a href="https://github.com/labteral/stopover-python/releases"><img alt="GitHub releases" src="https://img.shields.io/github/release/labteral/stopover-python.svg?style=flat-square"></a>
+    <a href="https://github.com/labteral/stopover-python/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/labteral/stopover-python.svg?style=flat-square&color=green"></a>
 </p>
-
-<h3 align="center">
-<b>Python client for Stopover</b>
-</h3>
 
 <p align="center">
     <a href="https://www.buymeacoffee.com/brunneis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="35px"></a>
