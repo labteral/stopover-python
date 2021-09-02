@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .utils import get_uid, compress, decompress, pack, unpack
-from .errors import PutError, GetError, CommitError, ServerConnectionError
+from . import errors
 import pickle
 import requests
 import json
@@ -18,14 +18,21 @@ def raise_connection_error(method):
             raise_connection_error = True
 
         if raise_connection_error:
-            raise ServerConnectionError(
+            raise errors.ServerConnectionError(
                 f"error connecting to the Stopover server ({self.endpoint})")
 
     return raise_connection_error_
 
 
 class MessageResponse:
-    def __init__(self, stream, partition, index, value, timestamp, status=None, **kwargs):
+    def __init__(self,
+                 stream,
+                 partition,
+                 index,
+                 value,
+                 timestamp,
+                 status=None,
+                 **kwargs):
         self.stream = stream
         self.partition = partition
         self.index = index
@@ -85,19 +92,26 @@ class Stopover:
         if key is not None:
             data['params']['key'] = key
 
-        response = self.session.post(self.endpoint, data=compress(pack(data))).json()
+        response = self.session.post(self.endpoint,
+                                     data=compress(pack(data))).json()
 
         if 'status' not in response or response['status'] != 'ok':
-            raise PutError(json.dumps(response))
+            raise errors.PutError(json.dumps(response))
 
     @raise_connection_error
-    def get(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
+    def get(self,
+            stream: str,
+            receiver_group: str,
+            receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         message = self._get(stream, receiver_group, receiver)
         return message
 
     @raise_connection_error
-    def listen(self, stream: str, receiver_group: str, receiver: str = None) -> MessageResponse:
+    def listen(self,
+               stream: str,
+               receiver_group: str,
+               receiver: str = None) -> MessageResponse:
         receiver = receiver if receiver else self.uid
         while True:
             message = self._get(stream, receiver_group, receiver)
@@ -121,7 +135,7 @@ class Stopover:
 
         response = self.session.post(self.endpoint, data=data).json()
         if response['status'] != 'ok':
-            raise CommitError
+            raise errors.CommitError
 
     @raise_connection_error
     def knock(self, receiver_group: str, receiver: str = None):
@@ -135,7 +149,8 @@ class Stopover:
         })
         self.session.post(self.endpoint, data=data)
 
-    def _get(self, stream: str, receiver_group: str, receiver: str) -> MessageResponse:
+    def _get(self, stream: str, receiver_group: str,
+             receiver: str) -> MessageResponse:
         data = json.dumps({
             'method': 'get_message',
             'params': {

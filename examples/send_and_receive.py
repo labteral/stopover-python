@@ -6,7 +6,9 @@ from stopover import Stopover
 endpoint = 'http://localhost:5704'
 receiver_group = 'group0'
 stream = 'stream0'
-key = None  # all the messages with the same key will fall under the same partition
+
+# all the messages with the same key will fall under the same partition
+key = None
 
 stopover = Stopover(endpoint)
 

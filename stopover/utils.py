@@ -3,9 +3,7 @@
 
 import msgpack
 import snappy
-import json
 import time
-import random
 import hashlib
 from uuid import uuid4
 
