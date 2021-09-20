@@ -1,7 +1,6 @@
 #!/bin/bash
-VERSION=$(cat ../stopover/__init__.py | grep version | cut -d\' -f2)
+cd $(dirname $0)
+source env.sh
+cd ..
 docker rmi labteral/stopover-python:$VERSION 2> /dev/null
-tar cf ../../stopover.tar ../
-mv ../../stopover.tar .
-docker build -t labteral/stopover-python:$VERSION .
-rm -f stopover.tar
+docker build -t labteral/stopover-python:$VERSION -f docker/Dockerfile .
