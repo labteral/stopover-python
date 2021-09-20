@@ -25,4 +25,6 @@ setup(name='stopover',
           "Topic :: Software Development :: Libraries :: Python Modules",
       ],
       python_requires=">=3.6",
-      install_requires=['msgpack==1.0.2', 'python-snappy==0.5.4', 'requests==2.24.0'])  # Dependencies
+      install_requires=[
+          'msgpack==1.0.2', 'python-snappy==0.5.4', 'requests==2.24.0'
+      ])  # Dependencies

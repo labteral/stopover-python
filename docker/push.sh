@@ -1,3 +1,4 @@
 #!/bin/bash
-VERSION=$(cat ../stopover/__init__.py | grep version | cut -d\' -f2)
+cd $(dirname $0)
+source env.sh
 docker push labteral/stopover-python:$VERSION

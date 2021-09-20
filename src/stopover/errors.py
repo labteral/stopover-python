@@ -16,3 +16,7 @@ class GetError(Exception):
 
 class ServerConnectionError(Exception):
     pass
+
+
+class KnockError(Exception):
+    pass
