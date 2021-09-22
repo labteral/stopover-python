@@ -5,7 +5,6 @@ from .utils import get_uid, compress, decompress, pack, unpack
 from . import errors
 import pickle
 import requests
-import json
 import time
 import random
 
@@ -266,18 +265,16 @@ class Stopover:
         partition: int,
         index: int,
     ) -> Response:
-        data = json.dumps(
-            {
-                'method': 'get_message',
-                'params': {
-                    'stream': stream,
-                    'receiver_group': receiver_group,
-                    'receiver': receiver,
-                    'index': index
-                }
+        data = {
+            'method': 'get_message',
+            'params': {
+                'stream': stream,
+                'receiver_group': receiver_group,
+                'receiver': receiver,
+                'index': index
             }
-        )
-        response = self.session.post(self.endpoint, data=data)
+        }
+        response = self.session.post(self.endpoint, data=compress(pack(data)))
         return Response(**unpack(decompress(response.content)))
 
     def _commit_call(
@@ -285,35 +282,33 @@ class Stopover:
         message: Response,
         receiver_group: str,
     ):
-        data = json.dumps(
-            {
-                'method': 'commit_message',
-                'params': {
-                    'stream': message.stream,
-                    'partition': message.partition,
-                    'index': message.index,
-                    'receiver_group': receiver_group,
-                }
+        data = {
+            'method': 'commit_message',
+            'params': {
+                'stream': message.stream,
+                'partition': message.partition,
+                'index': message.index,
+                'receiver_group': receiver_group,
             }
-        )
-        response = self.session.post(self.endpoint, data=data)
+        }
+
+        response = self.session.post(self.endpoint, data=compress(pack(data)))
         return Response(**unpack(decompress(response.content)))
 
-    @raise_connection_error
+    @ raise_connection_error
     def _knock_call(
         self,
         receiver_group: str,
         receiver: str = None,
     ):
         receiver = receiver if receiver else self.uid
-        data = json.dumps(
-            {
-                'method': 'knock',
-                'params': {
-                    'receiver_group': receiver_group,
-                    'receiver': receiver
-                }
+        data = {
+            'method': 'knock',
+            'params': {
+                'receiver_group': receiver_group,
+                'receiver': receiver
             }
-        )
-        response = self.session.post(self.endpoint, data=data)
+        }
+
+        response = self.session.post(self.endpoint, data=compress(pack(data)))
         return Response(**unpack(decompress(response.content)))
