@@ -9,7 +9,8 @@ stream = 'stream0'
 
 stopover = Stopover(endpoint)
 
-for index in range(100):
+
+for index in range(1):
     stopover.put(f'message #{index}', stream)
 
 for message in stopover.listen(stream, receiver_group,
