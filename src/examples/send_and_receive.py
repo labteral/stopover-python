@@ -10,7 +10,11 @@ stream = 'stream0'
 # all the messages with the same key will fall under the same partition
 key = None
 
-stopover = Stopover(endpoint)
+stopover = Stopover(
+    endpoint,
+    client_id='guest',
+    client_secret='guest',
+)
 
 stopover.put('hi 0', stream, key=key)
 index = 1

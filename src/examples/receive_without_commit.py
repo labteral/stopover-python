@@ -7,8 +7,11 @@ endpoint = 'http://localhost:5704'
 receiver_group = 'group1'
 stream = 'stream0'
 
-stopover = Stopover(endpoint)
-
+stopover = Stopover(
+    endpoint,
+    client_id='guest',
+    client_secret='guest',
+)
 
 for index in range(1):
     stopover.put(f'message #{index}', stream)

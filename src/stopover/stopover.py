@@ -7,6 +7,7 @@ import pickle
 import requests
 import time
 import random
+import base64
 
 
 class STATUS:
@@ -49,6 +50,8 @@ class Stopover:
         self,
         endpoint: str,
         uid: str = None,
+        client_id: str = None,
+        client_secret: str = None,
     ):
         self.endpoint = endpoint
         if uid is not None:
@@ -58,6 +61,13 @@ class Stopover:
 
         self.temporary_offsets = {}
         self.session = requests.Session()
+
+        if client_id is not None and client_secret is not None:
+            self.session.headers.update({
+                'Authorization': 'Basic ' + base64.b64encode(
+                    f'{client_id}:{client_secret}'.encode('ascii')
+                ).decode('ascii')
+            })
 
     @property
     def uid(self):
@@ -210,6 +220,10 @@ class Stopover:
         if key is not None:
             data['params']['key'] = key
         response = self.session.post(self.endpoint, data=compress(pack(data)))
+
+        if response.status_code != 200:
+            raise errors.ServerConnectionError(f'HTTP {response.status_code}')
+
         return Response(**unpack(decompress(response.content)))
 
     def _get_next_partition_and_index(
@@ -249,9 +263,11 @@ class Stopover:
         temporary_offsets = self.temporary_offsets[response.stream][
             response.receiver_group][response.receiver]
         temporary_offsets[response.partition] = (response.index + 1)
+
         for assigned_partition in response.assigned_partitions:
             if assigned_partition not in response.assigned_partitions:
                 del temporary_offsets[assigned_partition]
+
         for assigned_partition in response.assigned_partitions:
             if assigned_partition not in temporary_offsets:
                 temporary_offsets[assigned_partition] = None
@@ -275,6 +291,10 @@ class Stopover:
             }
         }
         response = self.session.post(self.endpoint, data=compress(pack(data)))
+
+        if response.status_code != 200:
+            raise errors.ServerConnectionError(f'HTTP {response.status_code}')
+
         return Response(**unpack(decompress(response.content)))
 
     def _commit_call(
@@ -293,9 +313,13 @@ class Stopover:
         }
 
         response = self.session.post(self.endpoint, data=compress(pack(data)))
+
+        if response.status_code != 200:
+            raise errors.ServerConnectionError(f'HTTP {response.status_code}')
+
         return Response(**unpack(decompress(response.content)))
 
-    @ raise_connection_error
+    @raise_connection_error
     def _knock_call(
         self,
         receiver_group: str,
@@ -311,4 +335,8 @@ class Stopover:
         }
 
         response = self.session.post(self.endpoint, data=compress(pack(data)))
+
+        if response.status_code != 200:
+            raise errors.ServerConnectionError(f'HTTP {response.status_code}')
+
         return Response(**unpack(decompress(response.content)))

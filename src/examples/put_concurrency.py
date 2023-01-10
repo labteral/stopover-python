@@ -10,10 +10,16 @@ def thread_func(name):
             print(f'sent: {message}')
             data.add(message)
 
+endpoint = 'http://localhost:5704'
+stopover = Stopover(
+    endpoint,
+    client_id='guest',
+    client_secret='guest',
+)
 
 topic = 'test_topic1'
 group = 'test_group1'
-stopover = Stopover('http://localhost:5704')
+
 lock = Lock()
 data = set()
 
