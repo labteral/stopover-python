@@ -10,6 +10,7 @@ def thread_func(name):
             print(f'sent: {message}')
             data.add(message)
 
+
 endpoint = 'http://localhost:5704'
 stopover = Stopover(
     endpoint,
