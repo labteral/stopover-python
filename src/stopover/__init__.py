@@ -3,4 +3,4 @@
 
 from .stopover import *  # noqa F403
 
-__version__ = '2.2610.0'
+__version__ = '2.2610.1'
