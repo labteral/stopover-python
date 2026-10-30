@@ -8,16 +8,16 @@
 # libsnappy-dev and the build-essential install/purge dance are gone. The SDK
 # setup.py reads its version without importing runtime dependencies.
 
-FROM python:3.14.8-alpine3.24@sha256:8acac70227ce3b34da9453120c375cc5b66cd0b062d4dc6bc74286f81a3819e1
+FROM python:3.14.10-alpine3.24@sha256:eb2c62658b8d51bff0acc408504b76521d02030de56a8a3c1e830083e89b89d2
 
 WORKDIR /opt/stopover-python
 COPY src .
 RUN \
     pip install --no-cache-dir \
-    "msgpack==1.2.3" \
+    "msgpack>=1.2.4,<2" \
     "python-snappy==0.7.3" \
     "requests==2.34.2" \
-    "setuptools==84.0.0" \
+    "setuptools>=84.2.1,<85" \
     "wheel==0.48.0" \
     && pip install --no-cache-dir --no-compile --no-build-isolation . \
     && rm -rf /root/.cache/pip \

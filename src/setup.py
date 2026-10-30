@@ -33,7 +33,7 @@ setup(name='stopover',
       ],
       python_requires='>=3.10,<4',
       install_requires=[
-          'msgpack >= 1.2.1, < 2.0.0',
+          'msgpack >= 1.2.4, < 2.0.0',
           'python-snappy >= 0.7.3, < 1.0.0',
           'requests >= 2.34.2, < 3.0.0'
       ])  # Dependencies
